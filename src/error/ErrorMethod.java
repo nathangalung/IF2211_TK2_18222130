@@ -1,8 +1,5 @@
 package src.error;
 
-/**
- * Enum for different error measurement methods
- */
 public enum ErrorMethod {
     VARIANCE(1, "Variance"),
     MAD(2, "Mean Absolute Deviation"),
@@ -26,12 +23,6 @@ public enum ErrorMethod {
         return name;
     }
     
-    /**
-     * Get ErrorMethod by its ID
-     * 
-     * @param id Method ID
-     * @return ErrorMethod or null if not found
-     */
     public static ErrorMethod getById(int id) {
         for (ErrorMethod method : values()) {
             if (method.getId() == id) {
@@ -41,11 +32,6 @@ public enum ErrorMethod {
         return null;
     }
     
-    /**
-     * Display available error methods
-     * 
-     * @return String representation of available methods
-     */
     public static String getAvailableMethods() {
         StringBuilder sb = new StringBuilder();
         sb.append("Available error measurement methods:\n");

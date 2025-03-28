@@ -4,24 +4,10 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-/**
- * Implements different error calculation methods for image blocks
- */
 public class ErrorCalculator {
     
-    /**
-     * Calculate error for a block using the specified method
-     * 
-     * @param image Source image
-     * @param x X position of the block
-     * @param y Y position of the block
-     * @param width Width of the block
-     * @param height Height of the block
-     * @param method Error measurement method
-     * @return Calculated error value
-     */
     public static double calculateError(BufferedImage image, int x, int y, int width, int height, ErrorMethod method) {
-        // Calculate average color first as needed by some methods
+        // Most methods need average color
         int[] avgColor = calculateAvgColor(image, x, y, width, height);
         
         switch (method) {
@@ -34,24 +20,12 @@ public class ErrorCalculator {
             case ENTROPY:
                 return calculateEntropy(image, x, y, width, height);
             case SSIM:
-                // SSIM is for comparing with the original, here simplified for block decision
-                // In a real implementation, this would involve more complex calculations
                 return calculateSimplifiedSSIM(image, x, y, width, height, avgColor);
             default:
                 return calculateVariance(image, x, y, width, height, avgColor);
         }
     }
     
-    /**
-     * Calculate average RGB color for a block
-     * 
-     * @param image Source image
-     * @param x X position
-     * @param y Y position
-     * @param width Block width
-     * @param height Block height
-     * @return int array with [R, G, B] values
-     */
     public static int[] calculateAvgColor(BufferedImage image, int x, int y, int width, int height) {
         long rSum = 0, gSum = 0, bSum = 0;
         int count = 0;
@@ -73,9 +47,6 @@ public class ErrorCalculator {
         };
     }
     
-    /**
-     * Calculate variance for a block
-     */
     private static double calculateVariance(BufferedImage image, int x, int y, int width, int height, int[] avgColor) {
         double rVariance = 0, gVariance = 0, bVariance = 0;
         int count = width * height;
@@ -96,9 +67,6 @@ public class ErrorCalculator {
         return (rVariance + gVariance + bVariance) / 3;
     }
     
-    /**
-     * Calculate Mean Absolute Deviation for a block
-     */
     private static double calculateMAD(BufferedImage image, int x, int y, int width, int height, int[] avgColor) {
         double rMAD = 0, gMAD = 0, bMAD = 0;
         int count = width * height;
@@ -119,9 +87,6 @@ public class ErrorCalculator {
         return (rMAD + gMAD + bMAD) / 3;
     }
     
-    /**
-     * Calculate Max Pixel Difference for a block
-     */
     private static double calculateMaxDiff(BufferedImage image, int x, int y, int width, int height) {
         int rMin = 255, gMin = 255, bMin = 255;
         int rMax = 0, gMax = 0, bMax = 0;
@@ -147,11 +112,7 @@ public class ErrorCalculator {
         return (rDiff + gDiff + bDiff) / 3;
     }
     
-    /**
-     * Calculate Entropy for a block
-     */
     private static double calculateEntropy(BufferedImage image, int x, int y, int width, int height) {
-        // Count occurrences of each value in each channel
         int[] rHistogram = new int[256];
         int[] gHistogram = new int[256];
         int[] bHistogram = new int[256];
@@ -163,7 +124,7 @@ public class ErrorCalculator {
         Arrays.fill(gHistogram, 0);
         Arrays.fill(bHistogram, 0);
         
-        // Fill histograms
+        // Count color frequencies
         for (int j = y; j < y + height; j++) {
             for (int i = x; i < x + width; i++) {
                 Color pixel = new Color(image.getRGB(i, j));
@@ -196,17 +157,12 @@ public class ErrorCalculator {
         return (rEntropy + gEntropy + bEntropy) / 3;
     }
     
-    /**
-     * Calculate a simplified version of SSIM for a block
-     * Note: This is a simplified version for the purpose of quadtree construction
-     * A full SSIM implementation would need more complexity
-     */
     private static double calculateSimplifiedSSIM(BufferedImage image, int x, int y, int width, int height, int[] avgColor) {
-        // Constants for SSIM calculation (typical values)
+        // Standard SSIM constants
         final double C1 = Math.pow(0.01 * 255, 2);
         final double C2 = Math.pow(0.03 * 255, 2);
         
-        // Create a uniform image with the average color to compare against
+        // Create reference image with solid color
         BufferedImage avgImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         int avgRGB = new Color(avgColor[0], avgColor[1], avgColor[2]).getRGB();
         for (int j = 0; j < height; j++) {
@@ -215,23 +171,18 @@ public class ErrorCalculator {
             }
         }
         
-        // Calculate SSIM components
-        double[] meanX = new double[3]; // Mean of original block
-        double[] meanY = new double[3]; // Mean of uniform block (should be avgColor)
-        double[] varX = new double[3];  // Variance of original block
-        double[] varY = new double[3];  // Variance of uniform block (should be 0)
-        double[] covarXY = new double[3]; // Covariance between original and uniform blocks
+        // Set up component arrays
+        double[] meanX = new double[3]; // Block mean
+        double[] meanY = new double[3]; // Reference mean
+        double[] varX = new double[3];  // Block variance
+        double[] covarXY = new double[3]; // Covariance
         
-        // Calculate means (should match avgColor for meanX)
-        meanX[0] = avgColor[0];
-        meanX[1] = avgColor[1];
-        meanX[2] = avgColor[2];
+        // Means are just the average color
+        meanX[0] = meanY[0] = avgColor[0];
+        meanX[1] = meanY[1] = avgColor[1];
+        meanX[2] = meanY[2] = avgColor[2];
         
-        meanY[0] = avgColor[0];
-        meanY[1] = avgColor[1];
-        meanY[2] = avgColor[2];
-        
-        // Calculate variances and covariance
+        // Calculate variance and covariance
         for (int j = y; j < y + height; j++) {
             for (int i = x; i < x + width; i++) {
                 Color pixel = new Color(image.getRGB(i, j));
@@ -240,7 +191,7 @@ public class ErrorCalculator {
                 varX[1] += Math.pow(pixel.getGreen() - meanX[1], 2);
                 varX[2] += Math.pow(pixel.getBlue() - meanX[2], 2);
                 
-                // Covariance with uniform image (simplified)
+                // Reference image is solid color, so covariance is simplified
                 covarXY[0] += (pixel.getRed() - meanX[0]) * (avgColor[0] - meanY[0]);
                 covarXY[1] += (pixel.getGreen() - meanX[1]) * (avgColor[1] - meanY[1]);
                 covarXY[2] += (pixel.getBlue() - meanX[2]) * (avgColor[2] - meanY[2]);
@@ -253,8 +204,8 @@ public class ErrorCalculator {
             covarXY[i] /= n;
         }
         
-        // Uniform image has 0 variance
-        varY[0] = varY[1] = varY[2] = 0;
+        // Reference image has 0 variance (solid color)
+        double[] varY = {0, 0, 0};
         
         // Calculate SSIM for each channel
         double[] ssim = new double[3];
@@ -263,11 +214,10 @@ public class ErrorCalculator {
                       ((meanX[i] * meanX[i] + meanY[i] * meanY[i] + C1) * (varX[i] + varY[i] + C2));
         }
         
-        // Use equal weights for RGB channels
+        // Average the channels
         double ssimRGB = (ssim[0] + ssim[1] + ssim[2]) / 3;
         
-        // SSIM is 1 for perfect similarity, 0 for no similarity
-        // For quadtree, we want high error for low similarity, so return 1-SSIM
+        // Invert for error measurement (1 = max error, 0 = no error)
         return 1 - ssimRGB;
     }
 }

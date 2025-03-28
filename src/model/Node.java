@@ -2,38 +2,21 @@ package src.model;
 
 import java.awt.Color;
 
-/**
- * Represents a node in the Quadtree structure
- */
 public class Node {
-    // Position and dimensions
+    // Region info
     private int x, y, width, height;
-    
-    // Average color for this block
     private int[] avgColor;
-    
-    // Error value for this block
     private double error;
     
-    // Children nodes (null for leaf nodes)
+    // Children
     private Node topLeft;
     private Node topRight;
     private Node bottomLeft;
     private Node bottomRight;
     
-    // Flag to indicate if this is a leaf node
+    // Leaf status
     private boolean isLeaf;
     
-    /**
-     * Constructor for a Node
-     * 
-     * @param x X-coordinate of the node
-     * @param y Y-coordinate of the node
-     * @param width Width of the block
-     * @param height Height of the block
-     * @param avgColor Average RGB color of the block
-     * @param error Error value for the block
-     */
     public Node(int x, int y, int width, int height, int[] avgColor, double error) {
         this.x = x;
         this.y = y;
@@ -41,86 +24,35 @@ public class Node {
         this.height = height;
         this.avgColor = avgColor;
         this.error = error;
-        this.isLeaf = true; // Default to leaf node until split
+        this.isLeaf = true; // Start as leaf until split
     }
     
-    // Getters and setters
-    public int getX() {
-        return x;
-    }
-    
-    public int getY() {
-        return y;
-    }
-    
-    public int getWidth() {
-        return width;
-    }
-    
-    public int getHeight() {
-        return height;
-    }
-    
-    public int[] getAvgColor() {
-        return avgColor;
-    }
+    // Simple getters
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public int[] getAvgColor() { return avgColor; }
+    public double getError() { return error; }
+    public boolean isLeaf() { return isLeaf; }
     
     public Color getColor() {
         return new Color(avgColor[0], avgColor[1], avgColor[2]);
     }
     
-    public double getError() {
-        return error;
-    }
+    // Child node getters
+    public Node getTopLeft() { return topLeft; }
+    public Node getTopRight() { return topRight; }
+    public Node getBottomLeft() { return bottomLeft; }
+    public Node getBottomRight() { return bottomRight; }
     
-    public boolean isLeaf() {
-        return isLeaf;
-    }
+    // These setters are rarely used except in split()
+    public void setLeaf(boolean isLeaf) { this.isLeaf = isLeaf; }
+    public void setTopLeft(Node node) { this.topLeft = node; }
+    public void setTopRight(Node node) { this.topRight = node; }
+    public void setBottomLeft(Node node) { this.bottomLeft = node; }
+    public void setBottomRight(Node node) { this.bottomRight = node; }
     
-    public void setLeaf(boolean isLeaf) {
-        this.isLeaf = isLeaf;
-    }
-    
-    public Node getTopLeft() {
-        return topLeft;
-    }
-    
-    public void setTopLeft(Node topLeft) {
-        this.topLeft = topLeft;
-    }
-    
-    public Node getTopRight() {
-        return topRight;
-    }
-    
-    public void setTopRight(Node topRight) {
-        this.topRight = topRight;
-    }
-    
-    public Node getBottomLeft() {
-        return bottomLeft;
-    }
-    
-    public void setBottomLeft(Node bottomLeft) {
-        this.bottomLeft = bottomLeft;
-    }
-    
-    public Node getBottomRight() {
-        return bottomRight;
-    }
-    
-    public void setBottomRight(Node bottomRight) {
-        this.bottomRight = bottomRight;
-    }
-    
-    /**
-     * Splits this node into four children
-     * 
-     * @param topLeft Top-left child node
-     * @param topRight Top-right child node
-     * @param bottomLeft Bottom-left child node
-     * @param bottomRight Bottom-right child node
-     */
     public void split(Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
         this.topLeft = topLeft;
         this.topRight = topRight;
