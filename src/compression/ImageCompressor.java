@@ -20,11 +20,6 @@ public class ImageCompressor {
     private boolean generateGif;
     private Quadtree quadtree;
     
-    // Default directories
-    private static final String DEFAULT_INPUT_DIR = "test/raw/";
-    private static final String DEFAULT_OUTPUT_DIR = "test/compressed/";
-    private static final String DEFAULT_GIF_DIR = "test/gif/";
-    
     // Constructor
     public ImageCompressor(
             String inputName, 
@@ -35,16 +30,23 @@ public class ImageCompressor {
             int minBlockSize,
             double targetCompressionRatio) {
         
-        // Setup paths with defaults
-        this.inputPath = DEFAULT_INPUT_DIR + inputName;
-        this.outputPath = DEFAULT_OUTPUT_DIR + outputName;
-        this.gifPath = (gifName != null && !gifName.isEmpty()) ? DEFAULT_GIF_DIR + gifName : null;
+        // Use paths as provided directly
+        this.inputPath = inputPath;
+        this.outputPath = outputPath;
+        this.gifPath = gifPath;
         
-        // Ensure directories exist
-        new File(DEFAULT_INPUT_DIR).mkdirs();
-        new File(DEFAULT_OUTPUT_DIR).mkdirs();
-        if (gifPath != null) {
-            new File(DEFAULT_GIF_DIR).mkdirs();
+        // Ensure directory exists for output path
+        File outputFile = new File(outputPath);
+        if (outputFile.getParentFile() != null) {
+            outputFile.getParentFile().mkdirs();
+        }
+        
+        // Ensure directories exist for gif path
+        if (gifPath != null && !gifPath.isEmpty()) {
+            File gifFile = new File(gifPath);
+            if (gifFile.getParentFile() != null) {
+                gifFile.getParentFile().mkdirs();
+            }
         }
         
         this.errorMethod = errorMethod;
