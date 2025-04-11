@@ -22,33 +22,16 @@ public class ImageCompressor {
     
     // Constructor
     public ImageCompressor(
-            String inputName, 
-            String outputName, 
-            String gifName,
+            String inputPath, 
+            String outputPath, 
+            String gifPath,
             ErrorMethod errorMethod, 
             double threshold, 
             int minBlockSize,
             double targetCompressionRatio) {
-        
-        // Use paths as provided directly
         this.inputPath = inputPath;
         this.outputPath = outputPath;
         this.gifPath = gifPath;
-        
-        // Ensure directory exists for output path
-        File outputFile = new File(outputPath);
-        if (outputFile.getParentFile() != null) {
-            outputFile.getParentFile().mkdirs();
-        }
-        
-        // Ensure directories exist for gif path
-        if (gifPath != null && !gifPath.isEmpty()) {
-            File gifFile = new File(gifPath);
-            if (gifFile.getParentFile() != null) {
-                gifFile.getParentFile().mkdirs();
-            }
-        }
-        
         this.errorMethod = errorMethod;
         this.threshold = threshold;
         this.minBlockSize = minBlockSize;
