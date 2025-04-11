@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 
 public class ImageUtil {
     
+    // Check file is image
     public static boolean isValidImageFile(String path) {
         try {
             File file = new File(path);
@@ -16,18 +17,19 @@ public class ImageUtil {
                 return false;
             }
             
-            // Try to read - will return null if not an image
             return ImageIO.read(file) != null;
         } catch (IOException e) {
             return false;
         }
     }
     
+    // Get width and height
     public static int[] getImageDimensions(String path) throws IOException {
         BufferedImage image = ImageIO.read(new File(path));
         return new int[] { image.getWidth(), image.getHeight() };
     }
     
+    // Clone image
     public static BufferedImage copyImage(BufferedImage source) {
         BufferedImage copy = new BufferedImage(
             source.getWidth(), source.getHeight(), source.getType());
@@ -37,6 +39,7 @@ public class ImageUtil {
         return copy;
     }
     
+    // Draw grid lines
     public static void drawQuadtreeGrid(BufferedImage image, int x, int y, int width, int height, Color color) {
         Graphics2D g = image.createGraphics();
         g.setColor(color);

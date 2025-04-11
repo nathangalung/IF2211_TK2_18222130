@@ -7,6 +7,7 @@ public class CompressionStats {
     private int nodeCount;
     private long executionTimeMs;
     
+    // Store compression stats
     public CompressionStats(long originalFileSize, long compressedFileSize, int treeDepth, int nodeCount, long executionTimeMs) {
         this.originalFileSize = originalFileSize;
         this.compressedFileSize = compressedFileSize;
@@ -15,6 +16,7 @@ public class CompressionStats {
         this.executionTimeMs = executionTimeMs;
     }
     
+    // Calculate compression ratio
     public double getCompressionPercentage() {
         if (originalFileSize == 0) {
             return 0;
@@ -22,10 +24,11 @@ public class CompressionStats {
         return 1.0 - ((double) compressedFileSize / originalFileSize);
     }
     
-    // Simple getters for basic stats
+    // Stats getters
     public int getTreeDepth() { return treeDepth; }
     public int getNodeCount() { return nodeCount; }
     
+    // Format time display
     private String formatTime() {
         if (executionTimeMs < 1000) {
             return executionTimeMs + " ms";
@@ -35,6 +38,7 @@ public class CompressionStats {
         }
     }
     
+    // Format size display
     private static String formatSize(long size) {
         if (size < 1024) {
             return size + " bytes";
@@ -45,6 +49,7 @@ public class CompressionStats {
         }
     }
     
+    // Generate report text
     public String getSummary() {
         StringBuilder sb = new StringBuilder();
         sb.append("Compression Statistics:\n");

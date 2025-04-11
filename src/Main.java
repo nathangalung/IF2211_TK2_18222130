@@ -8,14 +8,15 @@ import src.util.ImageUtil;
 public class Main {
     
     public static void main(String[] args) {
+        System.out.println();
         System.out.println("=== Quadtree Image Compression ===");
-        System.out.println("IF2211 - Strategi Algoritma");
+        System.out.println("IF2211 - Strategi Algoritma - 13523153 & 18222130");
         System.out.println("----------------------------------------");
         
         Scanner scanner = new Scanner(System.in);
         
         try {
-            // Get all required inputs
+            // Get user inputs
             String inputPath = getInputPath(scanner);
             ErrorMethod errorMethod = getErrorMethod(scanner);
             double threshold = getThreshold(scanner, errorMethod);
@@ -24,7 +25,7 @@ public class Main {
             String outputPath = getOutputPath(scanner);
             String gifPath = getGifPath(scanner);
             
-            // Run compression
+            // Compress image
             System.out.println("\nStarting image compression...");
             ImageCompressor compressor = new ImageCompressor(
                 inputPath, outputPath, gifPath, errorMethod, threshold, minBlockSize, targetRatio
@@ -48,6 +49,7 @@ public class Main {
         }
     }
     
+    // Get image path
     private static String getInputPath(Scanner scanner) {
         String path = "";
         boolean valid = false;
@@ -78,6 +80,7 @@ public class Main {
         return path;
     }
     
+    // Select error method
     private static ErrorMethod getErrorMethod(Scanner scanner) {
         ErrorMethod method = null;
         
@@ -100,11 +103,12 @@ public class Main {
         return method;
     }
     
+    // Set error threshold
     private static double getThreshold(Scanner scanner, ErrorMethod errorMethod) {
         double threshold = 0;
         boolean valid = false;
         
-        // Give range hints based on method
+        // Range suggestions
         String hint;
         switch (errorMethod) {
             case VARIANCE:   hint = "Suggested range: 10-1000"; break;
@@ -136,6 +140,7 @@ public class Main {
         return threshold;
     }
     
+    // Set min block size
     private static int getMinBlockSize(Scanner scanner) {
         int size = 0;
         boolean valid = false;
@@ -160,6 +165,7 @@ public class Main {
         return size;
     }
     
+    // Set compression ratio
     private static double getTargetCompressionRatio(Scanner scanner) {
         double ratio = 0;
         boolean valid = false;
@@ -186,6 +192,7 @@ public class Main {
         return ratio;
     }
     
+    // Set output path
     private static String getOutputPath(Scanner scanner) {
         String path = "";
         boolean valid = false;
@@ -236,6 +243,7 @@ public class Main {
         return path;
     }
     
+    // Set GIF path
     private static String getGifPath(Scanner scanner) {
         System.out.println("\nWould you like to generate a GIF of the compression process? (y/n)");
         String response = scanner.nextLine().trim().toLowerCase();

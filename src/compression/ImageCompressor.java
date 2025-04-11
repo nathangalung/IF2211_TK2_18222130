@@ -20,17 +20,33 @@ public class ImageCompressor {
     private boolean generateGif;
     private Quadtree quadtree;
     
+    // Default directories
+    private static final String DEFAULT_INPUT_DIR = "test/raw/";
+    private static final String DEFAULT_OUTPUT_DIR = "test/compressed/";
+    private static final String DEFAULT_GIF_DIR = "test/gif/";
+    
+    // Constructor
     public ImageCompressor(
-            String inputPath, 
-            String outputPath, 
-            String gifPath,
+            String inputName, 
+            String outputName, 
+            String gifName,
             ErrorMethod errorMethod, 
             double threshold, 
             int minBlockSize,
             double targetCompressionRatio) {
-        this.inputPath = inputPath;
-        this.outputPath = outputPath;
-        this.gifPath = gifPath;
+        
+        // Setup paths with defaults
+        this.inputPath = DEFAULT_INPUT_DIR + inputName;
+        this.outputPath = DEFAULT_OUTPUT_DIR + outputName;
+        this.gifPath = (gifName != null && !gifName.isEmpty()) ? DEFAULT_GIF_DIR + gifName : null;
+        
+        // Ensure directories exist
+        new File(DEFAULT_INPUT_DIR).mkdirs();
+        new File(DEFAULT_OUTPUT_DIR).mkdirs();
+        if (gifPath != null) {
+            new File(DEFAULT_GIF_DIR).mkdirs();
+        }
+        
         this.errorMethod = errorMethod;
         this.threshold = threshold;
         this.minBlockSize = minBlockSize;
@@ -38,10 +54,11 @@ public class ImageCompressor {
         this.generateGif = gifPath != null && !gifPath.isEmpty();
     }
     
+    // Main compression process
     public CompressionStats compress() throws IOException {
         long startTime = System.currentTimeMillis();
         
-        // Load the input image
+        // Load image
         File inputFile = new File(inputPath);
         if (!inputFile.exists()) {
             throw new IOException("Input file does not exist: " + inputPath);
@@ -49,7 +66,7 @@ public class ImageCompressor {
         
         BufferedImage original = ImageIO.read(inputFile);
         
-        // Auto-scale very large images to prevent memory issues
+        // Scale large images
         if (original.getWidth() * original.getHeight() > 10000000) { // > 10MP
             double scale = Math.sqrt(10000000.0 / (original.getWidth() * original.getHeight()));
             int newWidth = (int)(original.getWidth() * scale);
@@ -58,26 +75,26 @@ public class ImageCompressor {
             original = scaleImage(original, newWidth, newHeight);
         }
         
-        // Auto-adjust threshold if needed
+        // Auto-adjust threshold
         if (targetCompressionRatio > 0) {
             threshold = findOptimalThreshold(original, targetCompressionRatio);
         }
         
-        // Create quadtree and compress the image
+        // Create quadtree
         this.quadtree = new Quadtree(original, minBlockSize, threshold, errorMethod, generateGif);
         BufferedImage compressed = quadtree.compressImage();
         
-        // Save the compressed image
+        // Save output
         File outputFile = new File(outputPath);
         String format = outputPath.substring(outputPath.lastIndexOf('.') + 1);
         ImageIO.write(compressed, format, outputFile);
         
-        // Generate GIF if requested
+        // Create GIF
         if (generateGif && quadtree.getCompressionSteps() != null) {
             GifGenerator.createGif(quadtree.getCompressionSteps(), gifPath);
         }
         
-        // Return compression stats
+        // Return stats
         long endTime = System.currentTimeMillis();
         return new CompressionStats(
             inputFile.length(),
@@ -88,30 +105,31 @@ public class ImageCompressor {
         );
     }
     
+    // Find best threshold
     private double findOptimalThreshold(BufferedImage original, double targetRatio) {
-        // Setup threshold search range
+        // Set search range
         double minThreshold = 0;
         double maxThreshold = 1000;
         double currentThreshold = (minThreshold + maxThreshold) / 2;
         double currentRatio;
-        int maxIterations = 8; // Reduced from 10 to improve performance
+        int maxIterations = 8;
         
-        // Scale down image for faster testing
+        // Smaller test image
         BufferedImage testImage = scaleDown(original, 2);
         int testBlockSize = Math.max(1, minBlockSize / 2);
         
         for (int i = 0; i < maxIterations; i++) {
-            // Create a test quadtree
+            // Test compression
             Quadtree testTree = new Quadtree(testImage, testBlockSize, currentThreshold, errorMethod, false);
             
-            // Check compression ratio
+            // Check ratio
             currentRatio = 1.0 - (double) testTree.getNodeCount() / (testImage.getWidth() * testImage.getHeight());
             
-            // If close enough, we're done
+            // Close enough
             if (Math.abs(currentRatio - targetRatio) < 0.05) {
                 break;
             } 
-            // Otherwise adjust the threshold
+            // Adjust threshold
             else if (currentRatio < targetRatio) {
                 minThreshold = currentThreshold;
             } else {
@@ -120,21 +138,23 @@ public class ImageCompressor {
             
             currentThreshold = (minThreshold + maxThreshold) / 2;
             
-            // Help avoid memory issues
+            // Free memory
             System.gc();
         }
         
         return currentThreshold;
     }
     
+    // Scale by factor
     private BufferedImage scaleDown(BufferedImage original, int factor) {
         int width = original.getWidth() / factor;
         int height = original.getHeight() / factor;
         return scaleImage(original, width, height);
     }
 
+    // Resize image
     private BufferedImage scaleImage(BufferedImage original, int width, int height) {
-        // For large images, use a more memory-efficient image type
+        // Choose format
         int imageType = (width * height > 4000000) ? 
                         BufferedImage.TYPE_3BYTE_BGR : 
                         BufferedImage.TYPE_INT_RGB;

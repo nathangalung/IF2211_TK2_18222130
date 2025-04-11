@@ -24,10 +24,10 @@ public class Node {
         this.height = height;
         this.avgColor = avgColor;
         this.error = error;
-        this.isLeaf = true; // Start as leaf until split
+        this.isLeaf = true;
     }
     
-    // Simple getters
+    // Position getters
     public int getX() { return x; }
     public int getY() { return y; }
     public int getWidth() { return width; }
@@ -36,6 +36,7 @@ public class Node {
     public double getError() { return error; }
     public boolean isLeaf() { return isLeaf; }
     
+    // Get color as Color
     public Color getColor() {
         return new Color(avgColor[0], avgColor[1], avgColor[2]);
     }
@@ -46,13 +47,14 @@ public class Node {
     public Node getBottomLeft() { return bottomLeft; }
     public Node getBottomRight() { return bottomRight; }
     
-    // These setters are rarely used except in split()
+    // Node state modifiers
     public void setLeaf(boolean isLeaf) { this.isLeaf = isLeaf; }
     public void setTopLeft(Node node) { this.topLeft = node; }
     public void setTopRight(Node node) { this.topRight = node; }
     public void setBottomLeft(Node node) { this.bottomLeft = node; }
     public void setBottomRight(Node node) { this.bottomRight = node; }
     
+    // Split into four children
     public void split(Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
         this.topLeft = topLeft;
         this.topRight = topRight;
